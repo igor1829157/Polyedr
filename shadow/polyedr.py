@@ -125,7 +125,8 @@ class Polyedr:
     # Параметры конструктора: файл, задающий полиэдр
     def __init__(self, file):
 
-        # списки вершин, рёбер и граней полиэдра
+        # списки вершин, рёбер и граней полиэдра,
+        # переменная, в которой хранится искомая сумма
         self.vertexes, self.edges, self.facets = [], [], []
         self.good_sum = 0.0
         self.c = 0
@@ -162,6 +163,7 @@ class Polyedr:
                     # задание самой грани
                     self.facets.append(Facet(vertexes))
 
+    # проверка, "хорошее" ли ребро
     def is_good(self, beg, fin):
         return not (abs(beg.x) < 1.0 * self.c and abs(beg.y) < 1.0 * self.c
                     and abs(fin.x) < 1.0 * self.c and
@@ -179,6 +181,7 @@ class Polyedr:
     def draw(self, tk="skip", show=True):  # pragma: no cover
         if show:
             tk.clean()
+            # изображение квадратов
             tk.draw_rect(R3(1.0, 1.0, 0.0) * self.c,
                          R3(-1.0, -1.0, 0.0) * self.c)
             tk.draw_rect(R3(2.0, 2.0, 0.0) * self.c,
