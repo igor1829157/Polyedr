@@ -127,6 +127,8 @@ class Polyedr:
 
         # списки вершин, рёбер и граней полиэдра
         self.vertexes, self.edges, self.facets = [], [], []
+        self.good_sum = 0.0
+        self.c = 0
 
         # список строк файла
         with open(file) as f:
@@ -136,6 +138,7 @@ class Polyedr:
                     buf = line.split()
                     # коэффициент гомотетии
                     c = float(buf.pop(0))
+                    self.c = c
                     # углы Эйлера, определяющие вращение
                     alpha, beta, gamma = (float(x) * pi / 180.0 for x in buf)
                 elif i == 1:
@@ -159,11 +162,35 @@ class Polyedr:
                     # задание самой грани
                     self.facets.append(Facet(vertexes))
 
+    def is_good(self, beg, fin):
+        return not (abs(beg.x) < 1.0 * self.c and abs(beg.y) < 1.0 * self.c
+                    and abs(fin.x) < 1.0 * self.c and
+                    abs(fin.y) < 1.0 * self.c and abs((beg.x+fin.x)/2) <
+                    1.0 * self.c and abs((beg.y+fin.y)/2) < 1.0 * self.c) \
+                        and (abs(beg.x) < 2.0 * self.c and abs(beg.y) <
+                             2.0 * self.c
+                             and abs(fin.x) < 2.0 * self.c and
+                             abs(fin.y) < 2.0 * self.c and
+                             abs((beg.x+fin.x)/2)
+                             < 2.0 * self.c and abs((beg.y+fin.y)/2)
+                             < 2.0 * self.c)
+
     # Метод изображения полиэдра
-    def draw(self, tk):  # pragma: no cover
-        tk.clean()
+    def draw(self, tk="skip", show=True):  # pragma: no cover
+        if show:
+            tk.clean()
+            tk.draw_rect(R3(1.0, 1.0, 0.0) * self.c,
+                         R3(-1.0, -1.0, 0.0) * self.c)
+            tk.draw_rect(R3(2.0, 2.0, 0.0) * self.c,
+                         R3(-2.0, -2.0, 0.0) * self.c)
         for e in self.edges:
             for f in self.facets:
                 e.shadow(f)
             for s in e.gaps:
-                tk.draw_line(e.r3(s.beg), e.r3(s.fin))
+                if self.is_good(e.r3(s.beg), e.r3(s.fin)):
+                    self.good_sum += ((e.r3(s.fin).x - e.r3(s.beg).x) ** 2
+                                      + (e.r3(s.fin).y - e.r3(s.beg).y) ** 2 +
+                                      (e.r3(s.fin).z -
+                                       e.r3(s.beg).z) ** 2) ** 0.5
+                if show:
+                    tk.draw_line(e.r3(s.beg), e.r3(s.fin))
