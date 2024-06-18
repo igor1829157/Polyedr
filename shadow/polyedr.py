@@ -7,6 +7,7 @@ from common.tk_drawer import TkDrawer
 
 class Segment:
     """ Одномерный отрезок """
+
     # Параметры конструктора: начало и конец отрезка (числа)
 
     def __init__(self, beg, fin):
@@ -83,10 +84,12 @@ class Edge:
 
 class Facet:
     """ Грань полиэдра """
+
     # Параметры конструктора: список вершин
 
-    def __init__(self, vertexes):
+    def __init__(self, vertexes, is_nice=False):
         self.vertexes = vertexes
+        self.is_nice = is_nice
 
     # «Вертикальна» ли грань?
     def is_vertical(self):
@@ -95,7 +98,7 @@ class Facet:
     # Нормаль к «горизонтальному» полупространству
     def h_normal(self):
         n = (
-            self.vertexes[1] - self.vertexes[0]).cross(
+                self.vertexes[1] - self.vertexes[0]).cross(
             self.vertexes[2] - self.vertexes[0])
         return n * (-1.0) if n.dot(Polyedr.V) < 0.0 else n
 
@@ -108,8 +111,8 @@ class Facet:
     # Вспомогательный метод
     def _vert(self, k):
         n = (self.vertexes[k] - self.vertexes[k - 1]).cross(Polyedr.V)
-        return n * \
-            (-1.0) if n.dot(self.vertexes[k - 1] - self.center()) < 0.0 else n
+        return n * (-1.0)\
+            if n.dot(self.vertexes[k - 1] - self.center()) < 0.0 else n
 
     # Центр грани
     def center(self):
@@ -125,11 +128,9 @@ class Polyedr:
     # Параметры конструктора: файл, задающий полиэдр
     def __init__(self, file):
 
-        # списки вершин, рёбер и граней полиэдра,
-        # переменная, в которой хранится искомая сумма
+        # списки вершин, рёбер и граней полиэдра
         self.vertexes, self.edges, self.facets = [], [], []
-        self.good_sum = 0.0
-        self.c = 0
+        self.area = 0
 
         # список строк файла
         with open(file) as f:
@@ -139,7 +140,6 @@ class Polyedr:
                     buf = line.split()
                     # коэффициент гомотетии
                     c = float(buf.pop(0))
-                    self.c = c
                     # углы Эйлера, определяющие вращение
                     alpha, beta, gamma = (float(x) * pi / 180.0 for x in buf)
                 elif i == 1:
@@ -156,44 +156,40 @@ class Polyedr:
                     # количество вершин очередной грани
                     size = int(buf.pop(0))
                     # массив вершин этой грани
-                    vertexes = list(self.vertexes[int(n) - 1] for n in buf)
+                    area = 0
+                    nice_count = 0
+                    vertexes = list()
+                    for j, n in enumerate(buf):
+                        vertexes.append(self.vertexes[int(n) - 1])
+                        if vertexes[-1].is_nice:
+                            nice_count += 1
+
+                        if 1 < j:
+                            v0 = vertexes[0] * (1 / c)
+                            v1 = vertexes[-1] * (1 / c)
+                            v2 = vertexes[-2] * (1 / c)
+                            ab, ac = v1 - v0, v2 - v0
+                            area += abs(ab.cross(ac)) / 2
+
                     # задание рёбер грани
                     for n in range(size):
                         self.edges.append(Edge(vertexes[n - 1], vertexes[n]))
                     # задание самой грани
-                    self.facets.append(Facet(vertexes))
-
-    # проверка, "хорошее" ли ребро
-    def is_good(self, beg, fin):
-        return not (abs(beg.x) < 1.0 * self.c and abs(beg.y) < 1.0 * self.c
-                    and abs(fin.x) < 1.0 * self.c and
-                    abs(fin.y) < 1.0 * self.c and abs((beg.x+fin.x)/2) <
-                    1.0 * self.c and abs((beg.y+fin.y)/2) < 1.0 * self.c) \
-                        and (abs(beg.x) < 2.0 * self.c and abs(beg.y) <
-                             2.0 * self.c
-                             and abs(fin.x) < 2.0 * self.c and
-                             abs(fin.y) < 2.0 * self.c and
-                             abs((beg.x+fin.x)/2)
-                             < 2.0 * self.c and abs((beg.y+fin.y)/2)
-                             < 2.0 * self.c)
+                    self.facets.append(Facet(vertexes, nice_count == 0))
+                    if self.facets[-1].is_nice:
+                        self.area += area
 
     # Метод изображения полиэдра
-    def draw(self, tk="skip", show=True):  # pragma: no cover
-        if show:
-            tk.clean()
-            # изображение квадратов
-            tk.draw_rect(R3(1.0, 1.0, 0.0) * self.c,
-                         R3(-1.0, -1.0, 0.0) * self.c)
-            tk.draw_rect(R3(2.0, 2.0, 0.0) * self.c,
-                         R3(-2.0, -2.0, 0.0) * self.c)
+    def draw(self, tk, show):  # pragma: no cover
+        tk.clean()
         for e in self.edges:
             for f in self.facets:
                 e.shadow(f)
             for s in e.gaps:
-                if self.is_good(e.r3(s.beg), e.r3(s.fin)):
-                    self.good_sum += ((e.r3(s.fin).x - e.r3(s.beg).x) ** 2
-                                      + (e.r3(s.fin).y - e.r3(s.beg).y) ** 2 +
-                                      (e.r3(s.fin).z -
-                                       e.r3(s.beg).z) ** 2) ** 0.5
                 if show:
                     tk.draw_line(e.r3(s.beg), e.r3(s.fin))
+
+    def task51(self):
+        for e in self.edges:
+            for f in self.facets:
+                e.shadow(f)

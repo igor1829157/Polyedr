@@ -43,11 +43,6 @@ class TkDrawer:
         self.canvas.create_line(x(p), y(p), x(q), y(q), fill="black", width=1)
         self.root.update()
 
-    def draw_rect(self, p, q):
-        self.canvas.create_rectangle(x(p), y(p),
-                                     x(q), y(q), width=5)
-        self.root.update()
-
 
 if __name__ == "__main__":  # pragma: no cover
 

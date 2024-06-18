@@ -5,8 +5,15 @@ class R3:
     """ Вектор (точка) в R3 """
 
     # Конструктор
-    def __init__(self, x, y, z):
+    def __init__(self, x, y, z, is_nice=None):
         self.x, self.y, self.z = x, y, z
+        if is_nice is None:
+            self.is_nice = abs(x - 2) < 1
+        else:
+            self.is_nice = is_nice
+
+    def __abs__(self):
+        return (self.x ** 2 + self.y ** 2 + self.z ** 2) ** 0.5
 
     # Сумма векторов
     def __add__(self, other):

@@ -38,7 +38,7 @@ class TestPolyedr(unittest.TestCase):
         self.assertEqual(len(self.polyedr.edges), 16)
 
     def test_sum(self):
-        self.assertEqual(self.polyedr.good_sum, 0.0)
+        self.assertAlmostEqual(self.polyedr.area, 4.0)
 
     def test_good1(self):
         fake_file_content = """40.0	45.0	-30.0	-60.0
@@ -54,8 +54,8 @@ class TestPolyedr(unittest.TestCase):
                    new=mock_open(read_data=fake_file_content)) as _file:
             self.polyedr = Polyedr(fake_file_path)
             _file.assert_called_once_with(fake_file_path)
-            self.polyedr.draw(show=False)
-        self.assertEqual(self.polyedr.good_sum, 80.0)
+            self.polyedr.task51()
+        self.assertAlmostEqual(self.polyedr.area, 4.00)
 
     def test_good2(self):
         fake_file_content = """200.0	45.0	45.0	30.0
@@ -79,4 +79,4 @@ class TestPolyedr(unittest.TestCase):
                    new=mock_open(read_data=fake_file_content)) as _file:
             self.polyedr = Polyedr(fake_file_path)
             _file.assert_called_once_with(fake_file_path)
-        self.assertEqual(self.polyedr.good_sum, 0.0)
+        self.assertAlmostEqual(self.polyedr.area, 6.0)
