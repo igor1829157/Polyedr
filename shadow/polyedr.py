@@ -180,14 +180,13 @@ class Polyedr:
                         self.area += area
 
     # Метод изображения полиэдра
-    def draw(self, tk, show):  # pragma: no cover
+    def draw(self, tk):  # pragma: no cover
         tk.clean()
         for e in self.edges:
             for f in self.facets:
                 e.shadow(f)
             for s in e.gaps:
-                if show:
-                    tk.draw_line(e.r3(s.beg), e.r3(s.fin))
+                tk.draw_line(e.r3(s.beg), e.r3(s.fin))
 
     def task51(self):
         for e in self.edges:
