@@ -161,7 +161,7 @@ class Polyedr:
                     vertexes = list()
                     for j, n in enumerate(buf):
                         vertexes.append(self.vertexes[int(n) - 1])
-                        if vertexes[-1].is_nice:
+                        if (vertexes[-1] * (1/c)).is_nice:
                             nice_count += 1
 
                         if 1 < j:

@@ -8,7 +8,7 @@ class R3:
     def __init__(self, x, y, z, is_nice=None):
         self.x, self.y, self.z = x, y, z
         if is_nice is None:
-            self.is_nice = abs(x - 2) < 1
+            self.is_nice = (abs(x - 2)) < 1
         else:
             self.is_nice = is_nice
 

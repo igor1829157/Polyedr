@@ -43,10 +43,10 @@ class TestPolyedr(unittest.TestCase):
     def test_good1(self):
         fake_file_content = """40.0	45.0	-30.0	-60.0
 4	1	4
-1.0 1.0 3.0
-1.0 -1.0 3.0
--1.0 -1.0 3.0
--1.0 1.0 3.0
+1.5 1.5 3.0
+1.5 -1.5 3.0
+-1.5 -1.5 3.0
+-1.5 1.5 3.0
 4	1    2    3    4
 """
         fake_file_path = 'data/test2.geom'
@@ -55,7 +55,7 @@ class TestPolyedr(unittest.TestCase):
             self.polyedr = Polyedr(fake_file_path)
             _file.assert_called_once_with(fake_file_path)
             self.polyedr.task51()
-        self.assertAlmostEqual(self.polyedr.area, 4.00)
+        self.assertAlmostEqual(self.polyedr.area, 0.00)
 
     def test_good2(self):
         fake_file_content = """200.0	45.0	45.0	30.0
